@@ -1,0 +1,8 @@
+how to start - on my computer
+
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+.\venv\Scripts\Activate.ps1
+
+
+Add a notebook config with figure settings and package imports
