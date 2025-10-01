@@ -39,7 +39,7 @@ python -m install -e .
 The package also requires dll files. The folders in "dlls" at ```Scientific Camera Interfaces\SDK\Python Toolkit\dlls``` are empty from download. Luckily those files are provided at ```Scientific_Camera_Interfaces_Windows-2.1\Scientific Camera Interfaces\SDK\Native Toolkit\dlls```. "dlls" itself contains two folders, one for 32-bit and the other for 64-bit. The files you are looking for are most likely in "64_lib", but you can always copy all files from both folders. Copy all files and paste them to the relevant folder at ```Scientific Camera Interfaces\SDK\Python Toolkit\dlls```.
 
 The path to these folders are given in ```main.py``` and we recommend to keep the ```Scientific Camera Interface``` package in there too (same as venv), but the path can be changed by the user too. 
-
+Please dont try to push the Thorlabs package or your own venv to this git.
 Now there should be no problem starting the program by writing:
 ```
 python main.py 
