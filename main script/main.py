@@ -8,7 +8,7 @@ def configure_path():
     is_64bits = sys.maxsize > 2**32
     # Relative path from active folder to dlls folder
     # NOTE: Current path is set according to a specific set of folder levels. Works if folder levels are kept as posted on GitLab.
-    relative_path_to_dlls = '..' + os.sep + 'Scientific Camera Interfaces' + os.sep + 'SDK' + os.sep + 'Python Toolkit' + os.sep + 'dlls' + os.sep
+    relative_path_to_dlls = 'Scientific Camera Interfaces' + os.sep + 'SDK' + os.sep + 'Python Toolkit' + os.sep + 'dlls' + os.sep
 
     if is_64bits:
         relative_path_to_dlls += '64_lib'
