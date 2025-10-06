@@ -2,12 +2,10 @@
 Main application window for speckle imaging GUI. 
 
 Script starts here from main.py
-
-
 """
 
 from PySide6.QtWidgets import (
-    QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QTextEdit, QLineEdit, QTableWidget, QTableWidgetItem, QGridLayout, QApplication
+    QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QTextEdit, QLineEdit, QTableWidget, QTableWidgetItem, QGridLayout, QApplication, QTabWidget
 )
 from PySide6.QtCore import Qt, QTimer, QSize
 from PySide6.QtGui import QIntValidator
@@ -17,17 +15,6 @@ import numpy as np
 from gui.widgets import ImageDisplay, MplCanvas
 from camera.camera_handler import CameraHandler
 from processing.speckle import SpeckleProcessor
-
-class PlotWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Speckle Plot")
-        self.setGeometry(200, 200, 600, 600)
-
-        layout = QVBoxLayout()
-        self.canvas = MplCanvas(self, width=5, height=5, dpi=100)
-        layout.addWidget(self.canvas)
-        self.setLayout(layout)
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -44,11 +31,14 @@ class MainWindow(QMainWindow):
         self.mode = "live"
         self.processor = SpeckleProcessor()  # empty for now
 
-        # Central widget + grid layout
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
+        # Use a tab widget as central widget. First tab contains the existing main layout.
+        self.tab_widget = QTabWidget()
+        self.setCentralWidget(self.tab_widget)
+
+        main_page = QWidget()
         main_layout = QGridLayout()
-        central_widget.setLayout(main_layout)
+        main_page.setLayout(main_layout)
+        self.tab_widget.addTab(main_page, "Main")
 
         # Top-left: Camera status + live feed
         camera_layout = QVBoxLayout()
@@ -180,9 +170,16 @@ class MainWindow(QMainWindow):
         table_widget.setLayout(table_layout)
         main_layout.addWidget(table_widget, 1, 1)
 
-        # ---------- Plot Window ----------
-        self.plot_window = PlotWindow()
-        self.plot_window.show()
+        # ---------- Plot Tab ----------
+        plot_page = QWidget()
+        plot_layout = QVBoxLayout()
+        # create the matplotlib canvas and expose it as self.canvas for plotting
+        self.canvas = MplCanvas(self, width=6, height=6, dpi=100)
+        plot_layout.addWidget(self.canvas)
+        plot_page.setLayout(plot_layout)
+        # keep a reference to the plot page so we can switch to it programmatically
+        self.plot_page = plot_page
+        self.tab_widget.addTab(plot_page, "Plot")
 
         # Camera handler + timer
         self.timer = QTimer()
@@ -361,9 +358,20 @@ class MainWindow(QMainWindow):
         U = np.real(u_image)
         V = np.imag(u_image)
         # draw quiver (use matplotlib axes in your MplCanvas)
-        ax = self.canvas.ax
-        ax.clear()
-        ax.quiver(cols, rows, V, U)   # note mapping of axes depending on how rows/cols defined
-        ax.set_title("Displacement (quiver)")
-        self.canvas.draw()
+        # draw on the embedded canvas inside the Plot tab
+        if hasattr(self, 'canvas') and self.canvas is not None:
+            ax = self.canvas.ax
+            ax.clear()
+            ax.quiver(cols, rows, V, U)   # note mapping of axes depending on how rows/cols defined
+            ax.set_title("Displacement (quiver)")
+            self.canvas.draw()
+            # switch to the plot tab so the user sees the result
+            try:
+                plot_index = self.tab_widget.indexOf(self.plot_page)
+                if plot_index != -1:
+                    self.tab_widget.setCurrentIndex(plot_index)
+            except Exception:
+                pass
+        else:
+            self.log_error("Plot canvas not available")
 
